@@ -1,0 +1,9 @@
+mediapipe==0.10.15
+opencv-python>=4.6.0.66
+tensorflow>=2.9.0
+protobuf>=4.25.3, <5
+scikit-learn>=1.0.2
+matplotlib>=3.5.1
+pandas
+numpy
+seaborn
