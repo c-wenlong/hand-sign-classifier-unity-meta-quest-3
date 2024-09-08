@@ -1,8 +1,9 @@
-# hand-gesture-recognition-using-mediapipe
-Estimate hand pose using MediaPipe (Python version).<br> This is a sample 
-program that recognizes hand signs and finger gestures with a simple MLP using the detected key points.
-<br> ❗ _️**This is English Translated version of the [original repo](https://github.com/Kazuhito00/hand-gesture-recognition-using-mediapipe). All Content is translated to english along with comments and notebooks**_ ❗
-<br> 
+# Hand Gesture Recognition Using MediaPipe (Extended Version)
+
+This repository builds upon the work of [Kazuhito Takahashi](https://github.com/Kazuhito00), whose original project can be found [here](https://github.com/Kazuhito00/hand-gesture-recognition-using-mediapipe), and the English translation done by [Nikita Kiselov](https://github.com/kinivi). The purpose of this extended version is to further enhance the functionality and documentation while providing additional improvements, including the addition of a hand sign recognition model for letters A to F.
+
+---
+
 ![mqlrf-s6x16](https://user-images.githubusercontent.com/37477845/102222442-c452cd00-3f26-11eb-93ec-c387c98231be.gif)
 
 This repository contains the following contents.
@@ -12,12 +13,25 @@ This repository contains the following contents.
 * Learning data for hand sign recognition and notebook for learning
 * Learning data for finger gesture recognition and notebook for learning
 
+---
+
+## Original Credits
+
+This project is built upon two key works:
+1. The original hand-gesture-recognition-using-mediapipe project by **Kazuhito Takahashi**. You can find the original repository [here](https://github.com/Kazuhito00/hand-gesture-recognition-using-mediapipe).
+2. The English translation of the original project, made by **Nikita Kiselov**. You can find the translated repository [here](https://github.com/kinivi).
+
+---
+
 # Requirements
 * mediapipe 0.8.1
 * OpenCV 3.4.2 or Later
 * Tensorflow 2.3.0 or Later<br>tf-nightly 2.5.0.dev or later (Only when creating a TFLite for an LSTM model)
 * scikit-learn 0.23.2 or Later (Only if you want to display the confusion matrix) 
 * matplotlib 3.3.2 or Later (Only if you want to display the confusion matrix)
+* pandas
+* numpy
+* seaborn
 
 # Demo
 Here's how to run the demo using your webcam.
@@ -49,12 +63,20 @@ Tracking confidence threshold (Default：0.5)
 │  │  │  keypoint_classifier.tflite
 │  │  └─ keypoint_classifier_label.csv
 │  │          
-│  └─point_history_classifier
-│      │  point_history.csv
-│      │  point_history_classifier.hdf5
-│      │  point_history_classifier.py
-│      │  point_history_classifier.tflite
-│      └─ point_history_classifier_label.csv
+│  ├─point_history_classifier
+│  │   │  point_history.csv
+│  │   │  point_history_classifier.hdf5
+│  │   │  point_history_classifier.py
+│  │   │  point_history_classifier.tflite
+│  │   └─ point_history_classifier_label.csv
+│  │
+│  └─handsign_classifier
+│      │  handsign.csv
+│      │  handsigndraft.csv
+│      │  handsign_classifier.hdf5
+│      │  handsign_classifier.py
+│      │  handsign_classifier.tflite
+│      └─ handsign_classifier_label.csv
 │          
 └─utils
     └─cvfpscalc.py
@@ -143,8 +165,11 @@ The model using "LSTM" is as follows. <br>Please change "use_lstm = False" to "T
 # Author
 Kazuhito Takahashi(https://twitter.com/KzhtTkhs)
 
-# Translation and other improvements
+# Translation
 Nikita Kiselov(https://github.com/kinivi)
+
+# Sign Language Detection
+Chen Wenlong(https://github.com/c-wenlong/hand-sign-classifier-unity-meta-quest-3)
  
 # License 
 hand-gesture-recognition-using-mediapipe is under [Apache v2 license](LICENSE).
