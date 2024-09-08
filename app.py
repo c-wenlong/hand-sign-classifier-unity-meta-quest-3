@@ -12,7 +12,6 @@ import numpy as np
 import mediapipe as mp
 
 from utils import CvFpsCalc
-from utils import append_data_to_csv
 from model import KeyPointClassifier
 from model import PointHistoryClassifier
 from model import HandSignClassifier
@@ -168,10 +167,6 @@ def main():
                     point_history.append(landmark_list[8])
                 else:
                     point_history.append([0, 0])
-
-                # Write to the handsign csv file
-                #pre_processed_landmark_list_data = pre_processed_landmark_list + [hand_sign_alphabet]
-                #append_data_to_csv(pre_processed_landmark_list_data)
 
                 # Finger gesture classification
                 finger_gesture_id = 0
