@@ -6,7 +6,7 @@ import tensorflow as tf
 class HandSignClassifier(object):    
     def __init__(
         self,
-        model_path='change once classification model has been trained and exported', # NEED TO CHANGE
+        model_path='model/handsign_classifier/handsign_classifier.tflite', # NEED TO CHANGE
         num_threads=1,
     ):
         self.interpreter = tf.lite.Interpreter(model_path=model_path,

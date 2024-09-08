@@ -15,6 +15,7 @@ from utils import CvFpsCalc
 from utils import append_data_to_csv
 from model import KeyPointClassifier
 from model import PointHistoryClassifier
+from model import HandSignClassifier
 
 
 def get_args():
@@ -75,6 +76,8 @@ def main():
 
     point_history_classifier = PointHistoryClassifier()
 
+    hand_sign_classifier = HandSignClassifier()
+
     # Read labels ###########################################################
     with open(
         "model/keypoint_classifier/keypoint_classifier_label.csv", encoding="utf-8-sig"
@@ -86,9 +89,13 @@ def main():
         encoding="utf-8-sig",
     ) as f:
         point_history_classifier_labels = csv.reader(f)
-        point_history_classifier_labels = [
-            row[0] for row in point_history_classifier_labels
-        ]
+        point_history_classifier_labels = [row[0] for row in point_history_classifier_labels]
+    with open(
+        "model/handsign_classifier/handsign_classifier_label.csv",
+        encoding="utf-8-sig",
+    ) as f:
+        handsign_classifier_labels = csv.reader(f)
+        handsign_classifier_labels = [row[0] for row in handsign_classifier_labels]
 
     # FPS Measurement ########################################################
     cvFpsCalc = CvFpsCalc(buffer_len=10)
@@ -110,7 +117,7 @@ def main():
         key = cv.waitKey(10)
         if key == 27:  # ESC
             break
-        number, mode = select_mode(key, mode)
+        number, mode = select_mode(key, mode) # key is the number corresponding to the keyboard key pressed, mode is the filepath where we deposit the data
 
         # Camera capture #####################################################
         ret, image = cap.read()
@@ -142,24 +149,29 @@ def main():
                 pre_processed_point_history_list = pre_process_point_history(
                     debug_image, point_history
                 )
+
                 # Write to the dataset file
                 logging_csv(
                     number,
                     mode,
                     pre_processed_landmark_list,
                     pre_processed_point_history_list,
+                    pre_processed_landmark_list,
                 )
 
                 # Hand sign classification
                 hand_sign_id = keypoint_classifier(pre_processed_landmark_list)
+
+                hand_sign_alphabet = hand_sign_classifier(pre_processed_landmark_list)
+
                 if hand_sign_id == 2:  # Point gesture
                     point_history.append(landmark_list[8])
                 else:
                     point_history.append([0, 0])
 
-                # Write to the dataset file
-                pre_processed_landmark_list_data = pre_processed_landmark_list + [6]
-                append_data_to_csv(pre_processed_landmark_list_data)
+                # Write to the handsign csv file
+                #pre_processed_landmark_list_data = pre_processed_landmark_list + [hand_sign_alphabet]
+                #append_data_to_csv(pre_processed_landmark_list_data)
 
                 # Finger gesture classification
                 finger_gesture_id = 0
@@ -180,7 +192,8 @@ def main():
                     debug_image,
                     brect,
                     handedness,
-                    keypoint_classifier_labels[hand_sign_id],
+                    # keypoint_classifier_labels[hand_sign_id],
+                    handsign_classifier_labels[hand_sign_alphabet],
                     point_history_classifier_labels[most_common_fg_id[0][0]],
                 )
         else:
@@ -206,6 +219,8 @@ def select_mode(key, mode):
         mode = 1
     if key == 104:  # h
         mode = 2
+    if key == 115:  # s
+        mode = 3
     return number, mode
 
 
@@ -293,7 +308,7 @@ def pre_process_point_history(image, point_history):
     return temp_point_history
 
 
-def logging_csv(number, mode, landmark_list, point_history_list):
+def logging_csv(number, mode, landmark_list, point_history_list, handsign_list):
     if mode == 0:
         pass
     if mode == 1 and (0 <= number <= 9):
@@ -306,6 +321,11 @@ def logging_csv(number, mode, landmark_list, point_history_list):
         with open(csv_path, "a", newline="") as f:
             writer = csv.writer(f)
             writer.writerow([number, *point_history_list])
+    if mode == 3  and (0 <= number <= 9):
+        csv_path = "model/handsign_classifier/handsign.csv"
+        with open(csv_path, "a", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow([number, *handsign_list])
     return
 
 
