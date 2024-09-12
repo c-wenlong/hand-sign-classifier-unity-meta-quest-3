@@ -12,6 +12,7 @@ import numpy as np
 import mediapipe as mp
 
 from utils import CvFpsCalc
+from utils import append_batch_to_csv
 from model import KeyPointClassifier
 from model import PointHistoryClassifier
 from model import HandSignClassifier
@@ -88,7 +89,9 @@ def main():
         encoding="utf-8-sig",
     ) as f:
         point_history_classifier_labels = csv.reader(f)
-        point_history_classifier_labels = [row[0] for row in point_history_classifier_labels]
+        point_history_classifier_labels = [
+            row[0] for row in point_history_classifier_labels
+        ]
     with open(
         "model/handsign_classifier/handsign_classifier_label.csv",
         encoding="utf-8-sig",
@@ -108,6 +111,7 @@ def main():
 
     #  ########################################################################
     mode = 0
+    data_batch = []  # This is the array that will be appended to the CSV file
 
     while True:
         fps = cvFpsCalc.get()
@@ -116,8 +120,13 @@ def main():
         key = cv.waitKey(10)
         if key == 27:  # ESC
             break
-        number, mode = select_mode(key, mode) # key is the number corresponding to the keyboard key pressed, mode is the filepath where we deposit the data
+        number, mode = select_mode(
+            key, mode
+        )  # key is the number corresponding to the keyboard key pressed, mode is the filepath where we deposit the data
 
+        if key == 97: # a
+            append_batch_to_csv("model/handsign_classifier/handsign.csv", data_batch)
+            data_batch.clear()  # Clear the batch after saving
         # Camera capture #####################################################
         ret, image = cap.read()
         if not ret:
@@ -142,9 +151,9 @@ def main():
                 # Landmark calculation
                 landmark_list = calc_landmark_list(debug_image, hand_landmarks)
 
-                # Conversion to relative coordinates / normalized coordinates
+                # Conversion to relative coordinates / normalized coordinates [COORDS]
                 pre_processed_landmark_list = pre_process_landmark(landmark_list)
-                
+
                 pre_processed_point_history_list = pre_process_point_history(
                     debug_image, point_history
                 )
@@ -158,10 +167,13 @@ def main():
                     pre_processed_landmark_list,
                 )
 
-                # Hand sign classification
+                # Hand sign classification [LABELS]
                 hand_sign_id = keypoint_classifier(pre_processed_landmark_list)
-
                 hand_sign_alphabet = hand_sign_classifier(pre_processed_landmark_list)
+
+                # Append to training data
+                #training_data = pre_processed_landmark_list + [11]
+                #data_batch.append(training_data)
 
                 if hand_sign_id == 2:  # Point gesture
                     point_history.append(landmark_list[8])
@@ -316,7 +328,7 @@ def logging_csv(number, mode, landmark_list, point_history_list, handsign_list):
         with open(csv_path, "a", newline="") as f:
             writer = csv.writer(f)
             writer.writerow([number, *point_history_list])
-    if mode == 3  and (0 <= number <= 9):
+    if mode == 3 and (0 <= number <= 9):
         csv_path = "model/handsign_classifier/handsign.csv"
         with open(csv_path, "a", newline="") as f:
             writer = csv.writer(f)
@@ -681,8 +693,8 @@ def draw_info(image, fps, mode, number):
         cv.LINE_AA,
     )
 
-    mode_string = ["Logging Key Point", "Logging Point History"]
-    if 1 <= mode <= 2:
+    mode_string = ["Logging Key Point", "Logging Point History", "Logging Hand Sign"]
+    if 1 <= mode <= 3:
         cv.putText(
             image,
             "MODE:" + mode_string[mode - 1],
